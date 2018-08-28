@@ -1,0 +1,16 @@
+{
+    "name": "ktkapp",
+    "version": "1.0.0",
+    "dependencies": {
+        "axios": "^0.18.0",
+        "body-parser": "^1.18.0",
+        "cloudinary": "^1.11.0",
+        "ethers": "^3.0.27",
+        "express": "^4.16.0",
+        "mongodb": "^3.0.0",
+        "ngrok": "^3.0.1",
+        "qr-image": "^3.2.0",
+        "qrcode": "^1.2.2",
+        "rubygems": "^1.0.3"
+    }
+}
