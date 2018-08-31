@@ -1,10 +1,11 @@
+const cfg = require('./config.js');
 var interfaceKTK = require('./serviceFunctions/sendKTK.js');
 var interfaceQR = require('./serviceFunctions/sendQR.js');
 var interfaceMsg = require('./serviceFunctions/sendMessage.js');
 var interfaceBal = require('./serviceFunctions/getBalance.js');
 
 //Token contract address
-var ctrAddress = '0xd08D431AeD057dF91c36427Ea140d2a78ab0905A';
+const ctrAddress = cfg.etherium.contractAddress; //'0xd08D431AeD057dF91c36427Ea140d2a78ab0905A';
 
 //var data = {"webhook":"on_message_incoming","from_user_id":1424413,"to_user_id":1420959,"message":"\u0411\u043e\u043b\u044c\u0448\u043e\u0439 \u041a\u0438\u0441\u043b\u043e\u0432\u0441\u043a\u0438\u0439 9"}
 
@@ -12,12 +13,12 @@ var message = 'pay 1425254 100';
 var fromID = '1421443';
 
 //Blinger paremeters for admin
-var adminID = '1420959';
-var adminTel = '79857293807';
+var adminID = cfg.blinger.adminId; // '1420959';
+var adminTel = cfg.blinger.adminTel; // '79857293807';
 
 //Contract creator
-var creatorName = 'user1'
-var creatoPass = 'mySimplePassword1';
+var creatorName = cfg.etherium.creatorName; //'user1'
+var creatoPass = cfg.etherium.creatoPass; //'mySimplePassword1';
 
 var methods = {};
 
@@ -51,7 +52,7 @@ methods.process = function(_fromID, _message) {
         var message = 'https://wa.me/' + adminTel + '?text=' + 'PAY%20' + fromID + '%20';
         var send = interfaceQR.sendQR(adminID, fromID, message);
 
-    }else if(msgArr[0].toUpperCase()=='hacker'){
+    }else if(msgArr[0].toUpperCase()=='HACKER'){
 
         var send = interfaceKTK.sendKTK(creatorName,creatoPass,fromID,fromID,"1000",ctrAddress);
 

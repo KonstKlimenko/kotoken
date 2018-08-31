@@ -1,12 +1,16 @@
+const cfg = require('../config.js');
 const axios = require('axios');
 const interfaceMsg = require('./sendMessage.js');
 const interfaceABI = require('./abiKTK.js');
 
 var abi = interfaceABI.getABI();
-var adminID = '1420959';
+
+const ctrAddress = cfg.etherium.contractAddress; //'0xd08D431AeD057dF91c36427Ea140d2a78ab0905A';
+
+var adminID = cfg.blinger.adminId; //'1420959';
 
 axios.defaults.baseURL = 'https://api.blinger.ru/1.0';
-axios.defaults.headers.common['Authorization'] = 'b98a079f9530d84131c910b2c2cff905';
+axios.defaults.headers.common['Authorization'] =  cfg.blinger.apiToken; // 'b98a079f9530d84131c910b2c2cff905';
 
 var ethers = require('ethers');
 

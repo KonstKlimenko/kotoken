@@ -1,16 +1,17 @@
+const cfg = require('../config.js');
 const interfaceABI = require('./abiKTK.js');
 var ethers = require('ethers');
 const interfaceMsg = require('./sendMessage.js');
 
 const provider = ethers.providers.getDefaultProvider('ropsten');
 
-const ctrAddress = '0xd08D431AeD057dF91c36427Ea140d2a78ab0905A';
+const ctrAddress = cfg.etherium.contractAddress; //'0xd08D431AeD057dF91c36427Ea140d2a78ab0905A';
 const abi = interfaceABI.getABI();
 
-var adminID = '1420959';
+var adminID = cfg.blinger.adminId; //'1420959';
 //Contract creator
-var creatorName = 'user1'
-var creatoPass = 'mySimplePassword1';
+var creatorName = cfg.etherium.creatorName; //'user1'
+var creatoPass = cfg.etherium.creatoPass; //'mySimplePassword1';
 
 var methods = {};
 

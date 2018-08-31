@@ -1,3 +1,4 @@
+const cfg = require('../config.js');
 var fs = require('fs');
 
 //Generate filename for QR image
@@ -6,7 +7,7 @@ var fileName = 'qr_svg' + Math.floor(Math.random() * 100000000) + '.png';
 //Init Axios for http requests
 const axios = require('axios');
 axios.defaults.baseURL = 'https://api.blinger.ru/1.0';
-axios.defaults.headers.common['Authorization'] = 'b98a079f9530d84131c910b2c2cff905';
+axios.defaults.headers.common['Authorization'] =  cfg.blinger.apiToken; // 'b98a079f9530d84131c910b2c2cff905';
 
 //Init cloudinary service
 var cloudinary = require('cloudinary');
