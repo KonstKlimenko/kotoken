@@ -21,9 +21,9 @@ const configs = {
         },
 
         blinger: {
-            adminId: "1420959",
-            adminTel: "79857293807",
-            apiToken: ""
+            adminId: "1443772",
+            adminTel: "79262799971",
+            apiToken: "60c84caf05e93d5781ab2ca994"
         }
     }
 }
