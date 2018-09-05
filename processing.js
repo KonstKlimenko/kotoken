@@ -44,7 +44,7 @@ methods.process = function(_fromID, _message) {
     }else if(msgArr[0].toUpperCase()=='BALANCE'){
 
         //Send user his/her balance
-        var bal = interfaceBal.getBalance(fromID);
+        var bal = interfaceBal.sendBalanceToUser(fromID);
 
     }else if(msgArr[0].toUpperCase()==''){
 

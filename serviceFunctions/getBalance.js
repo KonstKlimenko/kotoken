@@ -11,28 +11,35 @@ const abi = interfaceABI.getABI();
 var adminID = cfg.blinger.adminId; //'1420959';
 //Contract creator
 var creatorName = cfg.etherium.creatorName; //'user1'
-var creatoPass = cfg.etherium.creatoPass; //'mySimplePassword1';
+var creatorPass = cfg.etherium.creatoPass; //'mySimplePassword1';
 
 var methods = {};
 
-methods.getBalance = function(_ID) {
+methods.getBalance = function (_ID) {
     var username = _ID;
     var pass = _ID;
-    var walletAdmin = ethers.Wallet.fromBrainWallet(creatorName, creatoPass).then(function(walletAdmin) {
+    return ethers.Wallet.fromBrainWallet(creatorName, creatorPass).then(function (walletAdmin) {
         walletAdmin.provider = provider;
 
+        // var contract = new ethers.Contract(ctrAddress, abi, walletAdmin);
         var contract = new ethers.Contract(ctrAddress, abi, walletAdmin);
 
-        var wallet = ethers.Wallet.fromBrainWallet(username, pass).then(function(wallet) {
-            var callPromise = contract.balanceOf(wallet.address).then(function(result) {
-                    console.log('balance is ' + result + ' tokens for ' + wallet.address);
-
-                    var strBal = 'Your balance is ' + result + ' tokens\n'+
-                                 'Your ether address is '  +wallet.address;
-                    var msgBal = interfaceMsg.sendMessage(adminID, _ID, strBal);
+        return ethers.Wallet.fromBrainWallet(username, pass).then(function (wallet) {
+            return contract.balanceOf(wallet.address).then(function (result) {
+                console.log('balance is ' + result + ' tokens for ' + wallet.address);
+                return {balance: ''+result, address: wallet.address};
             });
         });
     });
-}
+};
+
+methods.sendBalanceToUser = function (_toID) {
+    return methods.getBalance(_toID).then(walletData => {
+            let strBal = `Your balance is ${walletData.balance} tokens\n Your ether address is ${walletData.address}`;
+
+            return interfaceMsg.sendMessage(adminID, _toID, strBal)
+        }
+    )
+};
 
 module.exports = methods;

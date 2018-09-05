@@ -1,5 +1,16 @@
-
 const configs = {
+
+    defaults: {
+        mongo: {
+            // db: "sketchethe0",
+            db: "tokentest",
+            collection: "accounts",
+            // apiKey: "ISpOrafbDytJQKPP-P0H3i4tToIYJrph",
+            apiKey: "i9DRHd3QNKj_wMzkGo2-UBwl6dmsujSY",
+            //mongo_api_accounts_crud_url: 'mongodb://api.mlab.com/api/1/databases/sketchethe0/collections/accounts?apiKey=ISpOrafbDytJQKPP-P0H3i4tToIYJrph',
+        }
+    },
+
     konst: {
         etherium: {
             contractAddress: "0xd08D431AeD057dF91c36427Ea140d2a78ab0905A",
@@ -11,7 +22,8 @@ const configs = {
             adminId: "1420959",
             adminTel: "79857293807",
             apiToken: "b98a079f9530d84131c910b2c2cff905"
-        }
+        },
+
     },
     leonid: {
         etherium: {
@@ -26,9 +38,11 @@ const configs = {
             apiToken: "60c84caf05e93d5781ab2ca99413f8e9"
         }
     }
-}
+};
 
 function selectProfile() {
+
+    let cfg = configs["konst"];
 
     if (process.env.PROFILE) {
         if (!configs[process.env.PROFILE]) {
@@ -37,12 +51,12 @@ function selectProfile() {
 
         }
         console.log(`Profile "${process.env.PROFILE}" is applied`);
-        return configs[process.env.PROFILE]
+        cfg = configs[process.env.PROFILE]
     } else {
         console.log(`default Profile is applied`)
-        return configs["konst"];
     }
 
+    return Object.assign({}, configs.defaults, cfg);
 }
 
 module.exports = selectProfile();
