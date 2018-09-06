@@ -46,7 +46,7 @@ methods.process = function(_fromID, _message) {
         //Send user his/her balance
         var bal = interfaceBal.sendBalanceToUser(fromID);
 
-    }else if(msgArr[0]='' || msgArr[0].toUpperCase()=='QR'){
+    }else if(msgArr[0]=='' || msgArr[0].toUpperCase()=='QR'){
 
         console.log('Here is your QR code to receive payments');
         var message = 'https://wa.me/' + adminTel + '?text=' + 'PAY%20' + fromID + '%20';
