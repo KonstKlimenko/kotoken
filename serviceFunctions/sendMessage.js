@@ -22,6 +22,7 @@ methods.sendMessage = function(_fromID, _toID, _message) {
             console.log(error.name);
             console.log(error.status);
             console.log(error.message);
+            console.log(error);
         });
 }
 

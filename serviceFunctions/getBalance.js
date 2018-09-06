@@ -35,8 +35,9 @@ methods.getBalance = function (_ID) {
 
 methods.sendBalanceToUser = function (_toID) {
     return methods.getBalance(_toID).then(walletData => {
+            console.log("Send To user");
             let strBal = `Your balance is ${walletData.balance} tokens\n Your ether address is ${walletData.address}`;
-
+            console.log(adminID, _toID, strBal, interfaceMsg);
             return interfaceMsg.sendMessage(adminID, _toID, strBal)
         }
     )
