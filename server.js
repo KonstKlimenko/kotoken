@@ -21,15 +21,19 @@ let dbOptions = {
 app.use(bodyParser.json());
 
 app.post("/authorize", (req, resp) => {
-    let userName = req.body.userName;
-    if (userName && userName.toLowerCase() == 'admin' && req.body.password == cfg.auth.adminPassword) {
+    let userName = _.get(req, "body.userName");
+    let password = _.get(req, "body.password");
+    console.log(`Authirzation request: ${userName}, Password: ${password}` );
+    if (userName && userName.toLowerCase() == 'admin' && password == cfg.auth.adminPassword) {
         auth.sign({user: "admin"}, cfg.auth.jwtSECRET, {}).then(
             token => {
+                console.log("Authirzed");
                 resp.set("Authorization", token);
                 resp.status(200).end();
 
             })
     } else {
+        console.log("Forbidden");
         resp.status(403).end();
     }
 });
@@ -40,10 +44,12 @@ app.get("/list", (req, resp) => {
     if (req.headers.authorization) {
         request = auth.verify(req.headers.authorization, cfg.auth.jwtSECRET).then(decoded => {
             if (decoded.user == "admin") {
-                console.log("Admin's request");
+                console.log("Admin's request for list");
                 return "admin";
             }
         });
+    } else {
+        console.log("User's request for list");
     }
 
     request.then(user=>{
