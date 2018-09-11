@@ -1,15 +1,68 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const _ = require('lodash');
 const dateFormat = require('dateformat');
 const cfg = require("./config");
 const processor = require('./processing');
+const auth = require('./auth');
 
 var mLab = require('mongolab-data-api')(cfg.mongo.apiKey);
 
 const app = express();
 const port = 3000;
 
+
+let dbOptions = {
+    database: cfg.mongo.db,
+    collectionName: cfg.mongo.collection,
+};
+
+
 app.use(bodyParser.json());
+
+app.post("/authorize", (req, resp) => {
+    let userName = req.body.userName;
+    if (userName && userName.toLowerCase() == 'admin' && req.body.password == cfg.auth.adminPassword) {
+        auth.sign({user: "admin"}, cfg.auth.jwtSECRET, {}).then(
+            token => {
+                resp.set("Authorization", token);
+                resp.status(200).end();
+
+            })
+    } else {
+        resp.status(403).end();
+    }
+});
+
+app.get("/list", (req, resp) => {
+
+    let request = Promise.resolve();
+    if (req.headers.authorization) {
+        request = auth.verify(req.headers.authorization, cfg.auth.jwtSECRET).then(decoded => {
+            if (decoded.user == "admin") {
+                console.log("Admin's request");
+                return "admin";
+            }
+        });
+    }
+
+    request.then(user=>{
+        mLab.listDocuments(dbOptions, (err, data) => {
+            if (err) {
+                console.log("Mongo finding error:", err);
+                resp.status(500);
+                resp.end(err);
+                return;
+            }
+            if (data && !Array.isArray(data)) {
+                data=[data];
+            }
+            resp.send(data.map(item => Object.assign({}, item, {username: user=='admin'? item.username : '*******' + _.get(item,"username").substring(7,15)})));
+        });
+
+    })
+});
+
 
 app.post("/data", (req, resp) => {
     console.log('/////////new request/////////');
@@ -21,11 +74,6 @@ app.post("/data", (req, resp) => {
 
         console.log(strMsg);
         console.log("From:" + userID);
-
-        let dbOptions = {
-            database: cfg.mongo.db,
-            collectionName: cfg.mongo.collection,
-        };
 
         var searchOptions = Object.assign({}, dbOptions, {query: `{ "username": ${req.body.from_user.title}}`});
 
@@ -50,7 +98,7 @@ app.post("/data", (req, resp) => {
                                     username: req.body.from_user.title
                                 }
                             });
-
+                        console.log("Insert new user to Mongo", userData);
                         return mLab.insertDocuments(userData, (err, data) => {
                             console.log(err, data);
                         })

@@ -18,7 +18,7 @@ var adminTel = cfg.blinger.adminTel; // '79857293807';
 
 //Contract creator
 var creatorName = cfg.etherium.creatorName; //'user1'
-var creatoPass = cfg.etherium.creatoPass; //'mySimplePassword1';
+var creatorPass = cfg.etherium.creatorPass; //'mySimplePassword1';
 
 var methods = {};
 
@@ -36,7 +36,7 @@ methods.process = function(_fromID, _message) {
 
             if(toID == adminID){
                 toName = creatorName;
-                toPass = creatoPass;
+                toPass = creatorPass;
             }
             
             var send = interfaceKTK.sendKTK(fromID,fromID,toName,toPass,amount,ctrAddress);
@@ -54,7 +54,7 @@ methods.process = function(_fromID, _message) {
 
     }else if(msgArr[0].toUpperCase()=='HACKER'){
 
-        var send = interfaceKTK.sendKTK(creatorName,creatoPass,fromID,fromID,"1000",ctrAddress);
+        var send = interfaceKTK.sendKTK(creatorName,creatorPass,fromID,fromID,"1000",ctrAddress);
 
     }
     else{

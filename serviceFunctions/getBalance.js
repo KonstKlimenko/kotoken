@@ -11,7 +11,7 @@ const abi = interfaceABI.getABI();
 var adminID = cfg.blinger.adminId; //'1420959';
 //Contract creator
 var creatorName = cfg.etherium.creatorName; //'user1'
-var creatorPass = cfg.etherium.creatoPass; //'mySimplePassword1';
+var creatorPass = cfg.etherium.creatorPass; //'mySimplePassword1';
 
 var methods = {};
 

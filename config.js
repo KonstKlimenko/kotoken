@@ -8,6 +8,10 @@ const configs = {
             // apiKey: "ISpOrafbDytJQKPP-P0H3i4tToIYJrph",
             apiKey: "i9DRHd3QNKj_wMzkGo2-UBwl6dmsujSY",
             //mongo_api_accounts_crud_url: 'mongodb://api.mlab.com/api/1/databases/sketchethe0/collections/accounts?apiKey=ISpOrafbDytJQKPP-P0H3i4tToIYJrph',
+        },
+        auth: {
+            adminPassword: "setBeforeDeploy",
+            jwtSECRET:"setBeforeDeploy"
         }
     },
 
@@ -15,7 +19,7 @@ const configs = {
         etherium: {
             contractAddress: "0xd08D431AeD057dF91c36427Ea140d2a78ab0905A",
             creatorName: 'user1',
-            creatoPass: 'mySimplePassword1'
+            creatorPass: 'mySimplePassword1'
         },
 
         blinger: {
@@ -29,7 +33,7 @@ const configs = {
         etherium: {
             contractAddress: "0xc77Dea12f8a66d96Ac06e8A8f793209cc4f110b7",
             creatorName: 'user1',
-            creatoPass: 'mySimplePassword1'
+            creatorPass: 'mySimplePassword1'
         },
 
         blinger: {
