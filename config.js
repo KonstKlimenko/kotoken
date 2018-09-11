@@ -1,6 +1,13 @@
+const _ = require("lodash");
+
 const configs = {
 
     defaults: {
+        etherium: {
+            tokenName:'KAT',
+            networkId: 3, //ropsten
+            ethToUsers:"0.0005",
+        },
         mongo: {
             // db: "sketchethe0",
             db: "tokentest",
@@ -11,7 +18,7 @@ const configs = {
         },
         auth: {
             adminPassword: "setBeforeDeploy",
-            jwtSECRET:"setBeforeDeploy"
+            jwtSECRET: "setBeforeDeploy"
         }
     },
 
@@ -60,7 +67,7 @@ function selectProfile() {
         console.log(`default Profile is applied`)
     }
 
-    return Object.assign({}, configs.defaults, cfg);
+    return _.merge({}, configs.defaults, cfg);
 }
 
 module.exports = selectProfile();

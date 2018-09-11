@@ -1,5 +1,5 @@
 const cfg = require('../config.js');
-var fs = require('fs');
+var util = require('util');
 
 //Init Axios for http requests
 const axios = require('axios');
@@ -17,14 +17,15 @@ methods.sendMessage = function(_fromID, _toID, _message) {
             message: _message
         })
         .then(function (response) {
+            // console.log(`Send message to user ${_fromID}: ${_message}`);
         })
         .catch(function (error) {
             console.log(error.name);
             console.log(error.status);
             console.log(error.message);
-            console.log(error);
+            console.dir(error, { depth: 3, colors: true });
         });
-}
+};
 
 module.exports = methods;
 

@@ -83,7 +83,7 @@ app.post("/data", (req, resp) => {
         console.log(strMsg);
         console.log("From:" + userID);
 
-        var searchOptions = Object.assign({}, dbOptions, {query: `{ "username": ${req.body.from_user.title}}`});
+        var searchOptions = Object.assign({}, dbOptions, {query: `{ "username": "${req.body.from_user.title}"}`});
 
         mLab.listDocuments(searchOptions, (err, data) => {
             if (err) {
