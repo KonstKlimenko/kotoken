@@ -23,11 +23,11 @@ app.use(bodyParser.json());
 app.post("/authorize", (req, resp) => {
     let userName = _.get(req, "body.userName");
     let password = _.get(req, "body.password");
-    console.log(`Authirzation request: ${userName}, Password: ${password}` );
+    console.log(`Authorization request: ${userName}, Password: ${password}` );
     if (userName && userName.toLowerCase() == 'admin' && password == cfg.auth.adminPassword) {
         auth.sign({user: "admin"}, cfg.auth.jwtSECRET, {}).then(
             token => {
-                console.log("Authirzed");
+                console.log("Authorized");
                 resp.set("Authorization", token);
                 resp.status(200).end();
 
@@ -44,8 +44,10 @@ app.get("/list", (req, resp) => {
     if (req.headers.authorization) {
         request = auth.verify(req.headers.authorization, cfg.auth.jwtSECRET).then(decoded => {
             if (decoded.user == "admin") {
-                console.log("Admin's request for list");
+                console.log("Authorized's request for list - Allowed");
                 return "admin";
+            } else {
+                console.log("Authorized's request for list - Forbidden");
             }
         });
     } else {
