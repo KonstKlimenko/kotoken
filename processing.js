@@ -59,7 +59,9 @@ methods.process = function(_fromID, _message) {
     }
     else{
         console.log('Unknown command');
-        interfaceMsg.sendMessage(adminID, _fromID, "Incorrect command. \nUse commands: \nBALANCE\nQR\nPAY <toUserId> <KATs amount>");
+        let message="Incorrect command.\n"
+        if (msgArr[0].toUpperCase()=='HELP') message='';
+        interfaceMsg.sendMessage(adminID, _fromID, `${message} Available commands: \nBALANCE\nQR\nPAY <toUserId> <KATs amount>`);
     }
 };
 
