@@ -59,6 +59,7 @@ methods.process = function(_fromID, _message) {
     }
     else{
         console.log('Unknown command');
+        interfaceMsg.sendMessage(adminID, _fromID, "Incorrect command");
     }
 };
 
