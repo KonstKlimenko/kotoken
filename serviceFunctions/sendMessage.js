@@ -17,7 +17,7 @@ methods.sendMessage = function(_fromID, _toID, _message) {
             message: _message
         })
         .then(function (response) {
-            console.log(`Send message to user ${_fromID}: ${_message}`);
+            console.log(`Send message to user ${_toID}: ${_message}`);
         })
         .catch(function (error) {
             console.log(error.name);
