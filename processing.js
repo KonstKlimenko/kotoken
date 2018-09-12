@@ -60,6 +60,6 @@ methods.process = function(_fromID, _message) {
     else{
         console.log('Unknown command');
     }
-}
+};
 
 module.exports = methods;

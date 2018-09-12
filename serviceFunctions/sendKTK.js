@@ -36,7 +36,9 @@ function sendEtherium(walletAdmin, toAddress, toUserId, amount) {
     return walletAdmin.sendTransaction(transaction).then(tx =>
         tx.wait().then(res => {
             console.log(`Etheriums are transfered to ${transaction.to}`);
-            interfaceMsg.sendMessage(adminID, toUserId, `New GAS arrived. ${cfg.etherium.ethToUsers} ETHs added to your wallet ${toAddress}`);
+            if (toUserId!=adminID) {
+                interfaceMsg.sendMessage(adminID, toUserId, `New GAS arrived. ${cfg.etherium.ethToUsers} ETHs added to your wallet ${toAddress}. You can send tokens now!`);
+            }
         })
     );
 }
@@ -49,7 +51,7 @@ function sendEtheriumToUsers(walletAdmin, walletFrom, senderUserId, walletTo, re
 }
 
 methods.sendKTK = function (_fromName, _fromPass, _toName, _toPass, amount, _ctrAddress) {
-    //Conract creator
+    //Contract creator
     var fromName = _fromName;
     var fromPass = _fromPass;
 
@@ -67,8 +69,6 @@ methods.sendKTK = function (_fromName, _fromPass, _toName, _toPass, amount, _ctr
                 return ethers.Wallet.fromBrainWallet(fromName, fromPass).then(function (walletFrom) {
                     walletFrom.provider = provider;
                     walletAdmin.provider = provider;
-
-                    var contractAdmin = new ethers.Contract(ctrAddress, abi, walletAdmin);
 
                     //Create a contract from wallet, so sendPromises are sent and signed by that wallet
                     var contractFrom = new ethers.Contract(ctrAddress, abi, walletFrom);
@@ -91,9 +91,11 @@ methods.sendKTK = function (_fromName, _fromPass, _toName, _toPass, amount, _ctr
                         });
 
                         contractFrom.transfer(walletTo.address, amount).then(function (result) {
-                            var msgInit = `///////Transaction initiated///////\nfrom user: ${fromName}\namount: ${amount} ${cfg.etherium.tokenName}s`;
+                            let senderName= (fromName==cfg.etherium.creatorName) ? 'Admin' : fromName;
+                            let recipient = (fromName==cfg.etherium.creatorName) ? toName : fromName;
+                            var msgInit = `///////Transaction initiated///////\nfrom user: ${senderName}\namount: ${amount} ${cfg.etherium.tokenName}s`;
                             console.log(msgInit);
-                            var msgInit = interfaceMsg.sendMessage(adminID, fromName, msgInit);
+                            var msgInit = interfaceMsg.sendMessage(adminID, recipient, msgInit);
                         }).catch(err => {
                             console.log(err);
                             sendEtheriumToUsers(walletAdmin, walletFrom, fromName);
