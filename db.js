@@ -28,21 +28,25 @@ function findUser(userName) {
     return getUsersList(searchOptions);
 }
 
-function addUser(document){
-    let userData = Object.assign({}, dbOptions,{documents: document});
-    return new promise((resolve, reject)=>{
-        mLab.insertDocuments(userData, (err, data) => {
-            console.log("Insert user", err, data);
+function saveUser(document) {
+    let userData = Object.assign({}, dbOptions, {data: document, upsert:true, query:`{ "username": "${document.username}"}`});
+    return new Promise((resolve, reject) => {
+        mLab.updateDocuments(userData, (err, data) => {
+            console.log("Upsert user", err, data);
             if (err) {
                 return reject(err);
             }
-            resolve(data);
+            findUser(document.username)
+                .then(updatedUser => {
+                    resolve(updatedUser)
+                });
         })
     })
 }
 
+
 module.exports = {
     getUsersList: getUsersList,
     findUser: findUser,
-    addUser: addUser
+    saveUser: saveUser
 };

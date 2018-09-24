@@ -1,8 +1,10 @@
 const cfg = require('./config.js');
+const _ = require('lodash');
 var interfaceKTK = require('./serviceFunctions/sendKTK.js');
 var interfaceQR = require('./serviceFunctions/sendQR.js');
 var interfaceMsg = require('./serviceFunctions/sendMessage.js');
 var interfaceBal = require('./serviceFunctions/getBalance.js');
+const db = require('./db');
 
 //Token contract address
 const ctrAddress = cfg.etherium.contractAddress; //'0xd08D431AeD057dF91c36427Ea140d2a78ab0905A';
@@ -22,45 +24,52 @@ var creatorPass = cfg.etherium.creatorPass; //'mySimplePassword1';
 
 var methods = {};
 
-methods.process = function(_fromID, _message) {
+methods.process = function (_fromID, _message, userData) {
     fromID = _fromID;
     var msgArr = _message.trim().split(" ");
 
-    if(msgArr[0].toUpperCase()=='PAY'){
+    if (msgArr[0].toUpperCase() == 'PAY') {
         var amount = parseInt(msgArr[2]);
-        if(amount > 0){
+        if (amount > 0) {
             var toID = msgArr[1];
             console.log('Initiate payment of ' + amount + ' tokens to ' + toID);
             var toName = toID;
             var toPass = toID;
 
-            if(toID == adminID){
+            if (toID == adminID) {
                 toName = creatorName;
                 toPass = creatorPass;
             }
-            
-            var send = interfaceKTK.sendKTK(fromID,fromID,toName,toPass,amount,ctrAddress);
-        };
-    }else if(msgArr[0].toUpperCase()=='BALANCE'){
+
+            var send = interfaceKTK.sendKTK(fromID, fromID, toName, toPass, amount, ctrAddress);
+        }
+    } else if (msgArr[0].toUpperCase() == 'BALANCE') {
 
         //Send user his/her balance
         var bal = interfaceBal.sendBalanceToUser(fromID);
 
-    }else if(msgArr[0]=='' || msgArr[0].toUpperCase()=='QR'){
+    } else if (msgArr[0].toUpperCase() == 'QR') {
 
         console.log('Here is your QR code to receive payments');
         var message = 'https://wa.me/' + adminTel + '?text=' + 'PAY%20' + fromID + '%20';
         var send = interfaceQR.sendQR(adminID, fromID, message);
 
-    }else if(msgArr[0].toUpperCase()=='HACKER'){
-
-        var send = interfaceKTK.sendKTK(creatorName,creatorPass,fromID,fromID,"1000",ctrAddress);
-
-    }
-    else{
+    } else if (msgArr[0].toUpperCase() == 'HACKER') {
+        if (!_.get(userData, "hackerUsed")) {
+            interfaceKTK.sendKTK(creatorName, creatorPass, fromID, fromID, "1000", ctrAddress);
+            userData.hackerUsed = 1;
+            db.saveUser(userData);
+        } else {
+            interfaceMsg.sendMessage(adminID, _fromID, "Credit has already been got");
+        }
+    } else if (_.includes(['PHOTO', 'FOTO'], _.toUpper(msgArr[0]))) {
+        userData.active = {};
+        userData.active.url = msgArr[1];//'https://bitcoin.org/img/home/bitcoin-img.svg?1537556757';
+        db.saveUser(userData);
+    } else {
         console.log('Unknown command');
-        let message="Incorrect command.\n"
-        if (msgArr[0].toUpperCase()=='HELP') message='';
+        let message = "Incorrect command.\n";
+        if (msgArr[0].toUpperCase() == 'HELP') message = '';
         interfaceMsg.sendMessage(adminID, _fromID, `${message} Available commands: \nBALANCE\nQR\nPAY <toUserId> <KATs amount>`);
     }
 };
