@@ -20,12 +20,15 @@ let dbOptions = {
 };
 
 
-
 var nocache = require('nocache');
 app.use(nocache());
 
 
-app.use(cors({origin:'*', allowedHeaders:'Content-Type,Authorization', exposedHeaders:"Content-Type,Authorization"}));
+app.use(cors({
+    origin: '*',
+    allowedHeaders: 'Content-Type,Authorization',
+    exposedHeaders: "Content-Type,Authorization"
+}));
 
 
 app.use(bodyParser.json());
@@ -39,7 +42,7 @@ app.post("/authorize", (req, resp) => {
             token => {
                 console.log("Authorized");
                 resp.header('Access-Control-Allow-Origin', '*');
-                resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+                resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
                 resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
                 resp.set("Authorization", token);
                 resp.status(200).end();
@@ -64,8 +67,11 @@ app.get("/list", auth.middleware, (req, resp) => {
             data = data.map(item => Object.assign({}, item, {username: '*******' + _.get(item, "username").substring(7, 15)}));
         }
         resp.header('Access-Control-Allow-Origin', '*');
-        resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+        resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
         resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+
+        data = data.forEach(item=>delete item.blingerId);
+
         resp.send(data);
     }).catch((err) => {
         resp.status(500);
@@ -77,7 +83,7 @@ app.get("/list", auth.middleware, (req, resp) => {
 app.post("/approval", (req, resp) => {
     if (!isAuthorisedUser(req)) {
         resp.header('Access-Control-Allow-Origin', '*');
-        resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+        resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
         resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
         resp.status(200);
     }
@@ -104,16 +110,15 @@ app.post("/data", (req, resp) => {
                         address: walletData.address,
                         balance: walletData.balance,
                         created: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
-                        username: req.body.from_user.title
+                        username: req.body.from_user.title,
+                        blingerId: userID
                     };
                     return db.saveUser(userData).then(() => {
                         console.log("New user added:", userData);
                     }).catch(console.log)
                 })
             }
-
-            processor.process(userID, strMsg, _.get(data,"[0]"));
-
+            processor.process(userID, strMsg, _.get(data, "[0]"));
         });
         resp.send('Ok');
     } else {
