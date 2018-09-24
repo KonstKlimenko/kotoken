@@ -56,6 +56,9 @@ app.get("/list", (req, resp) => {
             console.log("User's request for list - Hide numbers");
             data = data.map(item => Object.assign({}, item, {username: '*******' + _.get(item, "username").substring(7, 15)}));
         }
+        resp.header('Access-Control-Allow-Origin', '*');
+        resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+        resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
         resp.send(data);
     }).catch((err) => {
         resp.status(500);
@@ -102,7 +105,7 @@ app.post("/data", (req, resp) => {
                 })
             }
 
-            processor.process(userID, strMsg)
+            processor.process(userID, strMsg, _.get(data,"[0]"));
 
         });
         resp.send('Ok');
