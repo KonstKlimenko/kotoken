@@ -11,7 +11,7 @@ const interfaceBal = require('./serviceFunctions/getBalance.js');
 
 
 const app = express();
-const port = 3011;
+const port = 3000;
 
 
 let dbOptions = {
