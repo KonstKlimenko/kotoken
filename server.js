@@ -27,7 +27,7 @@ app.use(nocache());
 app.use(cors({
     origin: '*',
     // allowedHeaders: 'Content-Type,Authorization',
-    // exposedHeaders: "Content-Type,Authorization"
+    exposedHeaders: "Content-Type,Authorization"
 }));
 
 
