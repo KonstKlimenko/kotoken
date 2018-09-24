@@ -1,12 +1,14 @@
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
 const dateFormat = require('dateformat');
 const cfg = require("./config");
 const processor = require('./processing');
 const auth = require('./auth');
+const db = require('./db');
+const interfaceBal = require('./serviceFunctions/getBalance.js');
 
-var mLab = require('mongolab-data-api')(cfg.mongo.apiKey);
 
 const app = express();
 const port = 3000;
@@ -17,13 +19,14 @@ let dbOptions = {
     collectionName: cfg.mongo.collection,
 };
 
+app.use(cors());
 
 app.use(bodyParser.json());
 
 app.post("/authorize", (req, resp) => {
     let userName = _.get(req, "body.userName");
     let password = _.get(req, "body.password");
-    console.log(`Authorization request: ${userName}, Password: ${password}` );
+    console.log(`Authorization request: ${userName}, Password: ${password}`);
     if (userName && userName.toLowerCase() == 'admin' && password == cfg.auth.adminPassword) {
         auth.sign({user: "admin"}, cfg.auth.jwtSECRET, {}).then(
             token => {
@@ -38,37 +41,30 @@ app.post("/authorize", (req, resp) => {
     }
 });
 
+
+function isAuthorisedUser(req) {
+    return _.toLower(req.user) != "admin";
+}
+
 app.get("/list", (req, resp) => {
+    db.getUsersList().then(data => {
+        console.log(`Request for list from user: ${req.user}`);
+        if (isAuthorisedUser(req)) {
+            console.log("User's request for list - Hide numbers");
+            data = data.map(item => Object.assign({}, item, {username: '*******' + _.get(item, "username").substring(7, 15)}));
+        }
+        resp.send(data);
+    }).catch((err) => {
+        resp.status(500);
+        resp.end(err);
+    });
+});
 
-    let request = Promise.resolve();
-    if (req.headers.authorization) {
-        request = auth.verify(req.headers.authorization, cfg.auth.jwtSECRET).then(decoded => {
-            if (decoded.user == "admin") {
-                console.log("Authorized's request for list - Allowed");
-                return "admin";
-            } else {
-                console.log("Authorized's request for list - Forbidden");
-            }
-        });
-    } else {
-        console.log("User's request for list");
+
+app.post("/approval", (req, resp) => {
+    if (isAuthorisedUser(req)) {
+        // mlab
     }
-
-    request.then(user=>{
-        mLab.listDocuments(dbOptions, (err, data) => {
-            if (err) {
-                console.log("Mongo finding error:", err);
-                resp.status(500);
-                resp.end(err);
-                return;
-            }
-            if (data && !Array.isArray(data)) {
-                data=[data];
-            }
-            resp.send(data.map(item => Object.assign({}, item, {username: user=='admin'? item.username : '*******' + _.get(item,"username").substring(7,15)})));
-        });
-
-    })
 });
 
 
@@ -83,47 +79,26 @@ app.post("/data", (req, resp) => {
         console.log(strMsg);
         console.log("From:" + userID);
 
-        var searchOptions = Object.assign({}, dbOptions, {query: `{ "username": "${req.body.from_user.title}"}`});
+        db.findUser(req.body.from_user.title).then(data => {
+            if (data.length === 0) {
 
-        mLab.listDocuments(searchOptions, (err, data) => {
-            if (err) {
-                console.log("Mongo finding error:", err);
-                return;
+                return interfaceBal.getBalance(userID).then(walletData => {
+                    console.log("Wallet Data:", walletData);
+                    let userData = {
+                        address: walletData.address,
+                        balance: walletData.balance,
+                        created: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
+                        username: req.body.from_user.title
+                    };
+                    return db.addUser(userData).then(() => {
+                        console.log("New user added:", userData);
+                    }).catch(console.log)
+                })
             }
-            if (data && Array.isArray(data)) {
-                if (data.length === 0) {
-                    let interfaceBal = require('./serviceFunctions/getBalance.js');
 
-                    return interfaceBal.getBalance(userID).then(walletData => {
-                        console.log("Wallet Data:", walletData);
-
-                        let userData = Object.assign({}, dbOptions,
-                            {
-                                documents: {
-                                    address: walletData.address,
-                                    balance: walletData.balance,
-                                    created: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
-                                    username: req.body.from_user.title
-                                }
-                            });
-                        console.log("Insert new user to Mongo", userData);
-                        return mLab.insertDocuments(userData, (err, data) => {
-                            console.log(err, data);
-                        })
-
-                    }).then(
-                        () => processor.process(userID, strMsg)
-                    )
-                } else {
-                    return processor.process(userID, strMsg);
-                }
-            }
+            processor.process(userID, strMsg)
 
         });
-
-
-//        var process = processor.process(userID, strMsg);
-
         resp.send('Ok');
     } else {
         console.log("Empty body");

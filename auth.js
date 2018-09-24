@@ -1,10 +1,10 @@
-const jwt = require('jsonwebtoken')
-
+const jwt = require('jsonwebtoken');
+const cfg = require("./config");
 
 /**
  * @return {Promise} true/Error
  */
-module.exports.verify = (token, SECRET) => {
+function verify(token, SECRET) {
 
     return new Promise((resolve, reject) => {
         jwt.verify(token, SECRET, (error, decoded) => {
@@ -12,21 +12,40 @@ module.exports.verify = (token, SECRET) => {
                 if (error.name === 'TokenExpiredError') {
                     return reject("TOKEN_EXPIRED")
                 }
-                return reject({message: error.message })
+                return reject({message: error.message})
             }
             return resolve(decoded)
         })
     })
-};
+}
 
 /**
  * @return {Promise} string (token)
  */
-module.exports.sign = (playload, SECRET, options) => {
+function sign(playload, SECRET, options) {
     return new Promise((resolve, reject) => {
         jwt.sign(playload, SECRET, options, (error, token) => {
             if (error) return reject("TOKEN_NOT_SIGNED");
             return resolve(token)
         })
     })
+}
+
+
+function middleware(req, res, next) {
+    request = verify(req.headers.authorization, cfg.auth.jwtSECRET)
+        .then(decoded=>{
+            req.user = decoded.user;
+            next();
+        })
+        .catch(err=>{
+            console.log(err);
+            next();
+        })
+}
+
+
+module.exports = {
+    sign: sign,
+    middleware: middleware
 };

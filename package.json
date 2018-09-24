@@ -5,6 +5,7 @@
         "axios": "^0.18.0",
         "body-parser": "^1.18.0",
         "cloudinary": "^1.11.0",
+        "cors": "^2.8.4",
         "dateformat": "^3.0.3",
         "ethers": "^3.0.27",
         "express": "^4.16.3",
