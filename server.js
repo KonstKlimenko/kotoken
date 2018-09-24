@@ -19,7 +19,14 @@ let dbOptions = {
     collectionName: cfg.mongo.collection,
 };
 
-app.use(cors({origin:'*', allowedHeaders:'Content-Type,Authorization'}));
+
+
+var nocache = require('nocache');
+app.use(nocache());
+
+
+app.use(cors({origin:'*', allowedHeaders:'Content-Type,Authorization', exposedHeaders:"Content-Type,Authorization"}));
+
 
 app.use(bodyParser.json());
 
@@ -122,9 +129,6 @@ app.get("/", (req, resp) => {
     resp.send('Hello from Express!');
 });
 
-app.use((res, resp)=>{
-    resp.header("Cache-Control", "no-cache ");
-});
 
 app.listen(port, (err) => {
     if (err) {
