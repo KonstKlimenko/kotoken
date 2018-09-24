@@ -67,10 +67,10 @@ app.get("/list", auth.middleware, (req, resp) => {
             data = data.map(item => Object.assign({}, item, {username: '*******' + _.get(item, "username").substring(7, 15)}));
         }
         resp.header('Access-Control-Allow-Origin', '*');
-        // resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
-        // resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+        resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
+        resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
 
-        data = data.forEach(item=>delete item.blingerId);
+        data.forEach(item=>delete item.blingerId);
 
         resp.send(data);
     }).catch((err) => {
