@@ -53,13 +53,13 @@ app.post("/authorize", (req, resp) => {
 
 
 function isAuthorisedUser(req) {
-    return _.toLower(req.user) != "admin";
+    return _.toLower(req.user) == "admin";
 }
 
-app.get("/list", (req, resp) => {
+app.get("/list", auth.middleware, (req, resp) => {
     db.getUsersList().then(data => {
         console.log(`Request for list from user: ${req.user}`);
-        if (isAuthorisedUser(req)) {
+        if (!isAuthorisedUser(req)) {
             console.log("User's request for list - Hide numbers");
             data = data.map(item => Object.assign({}, item, {username: '*******' + _.get(item, "username").substring(7, 15)}));
         }
@@ -75,7 +75,7 @@ app.get("/list", (req, resp) => {
 
 
 app.post("/approval", (req, resp) => {
-    if (isAuthorisedUser(req)) {
+    if (!isAuthorisedUser(req)) {
         resp.header('Access-Control-Allow-Origin', '*');
         resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
         resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
@@ -106,7 +106,7 @@ app.post("/data", (req, resp) => {
                         created: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
                         username: req.body.from_user.title
                     };
-                    return db.addUser(userData).then(() => {
+                    return db.saveUser(userData).then(() => {
                         console.log("New user added:", userData);
                     }).catch(console.log)
                 })
