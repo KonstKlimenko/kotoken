@@ -122,6 +122,9 @@ app.get("/", (req, resp) => {
     resp.send('Hello from Express!');
 });
 
+app.use((res, resp)=>{
+    resp.header("Cache-Control", "no-cache ");
+});
 
 app.listen(port, (err) => {
     if (err) {
