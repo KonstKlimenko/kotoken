@@ -11,7 +11,7 @@ const interfaceBal = require('./serviceFunctions/getBalance.js');
 
 
 const app = express();
-const port = 3000;
+const port = 3011;
 
 
 let dbOptions = {
@@ -19,7 +19,7 @@ let dbOptions = {
     collectionName: cfg.mongo.collection,
 };
 
-app.use(cors());
+app.use(cors({origin:'*', allowedHeaders:'Content-Type,Authorization'}));
 
 app.use(bodyParser.json());
 
@@ -31,6 +31,9 @@ app.post("/authorize", (req, resp) => {
         auth.sign({user: "admin"}, cfg.auth.jwtSECRET, {}).then(
             token => {
                 console.log("Authorized");
+                resp.header('Access-Control-Allow-Origin', '*');
+                resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+                resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
                 resp.set("Authorization", token);
                 resp.status(200).end();
 
@@ -63,7 +66,10 @@ app.get("/list", (req, resp) => {
 
 app.post("/approval", (req, resp) => {
     if (isAuthorisedUser(req)) {
-        // mlab
+        resp.header('Access-Control-Allow-Origin', '*');
+        resp.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+        resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+        resp.status(200);
     }
 });
 
