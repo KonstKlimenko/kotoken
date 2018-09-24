@@ -6,6 +6,7 @@ const configs = {
         etherium: {
             tokenName:'KAT',
             networkId: 3, //ropsten
+            etherscanAddress:"https://ropsten.etherscan.io/address",
             ethToUsers:"0.0005",
         },
         mongo: {

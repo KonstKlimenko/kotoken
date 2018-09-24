@@ -27,7 +27,7 @@ app.use(nocache());
 app.use(cors({
     origin: '*',
     // allowedHeaders: 'Content-Type,Authorization',
-    exposedHeaders: "Content-Type,Authorization"
+    exposedHeaders: "authorization,cache-control,content-type"
 }));
 
 
@@ -80,13 +80,16 @@ app.get("/list", auth.middleware, (req, resp) => {
 });
 
 
-app.post("/approval", (req, resp) => {
+app.post("/approval", auth.middleware, (req, resp) => {
+    resp.header('Access-Control-Allow-Origin', '*');
+    // resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
+    // resp.header('Access-Control-Allow-Headers', 'authorization,cache-control,content-type');
+
     if (!isAuthorisedUser(req)) {
-        resp.header('Access-Control-Allow-Origin', '*');
-        // resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
-        // resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-        resp.status(200);
+
     }
+    resp.status(200);
+
 });
 
 

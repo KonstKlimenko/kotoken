@@ -23,13 +23,13 @@ function getUsersList(searchOptions) {
     })
 }
 
-function findUser(userName) {
-    let searchOptions = Object.assign({}, dbOptions, {query: `{ "username": "${userName}"}`});
+function findUser(value, field="username") {
+    let searchOptions = Object.assign({}, dbOptions, {query: `{ "${field}": "${value}"}`});
     return getUsersList(searchOptions);
 }
 
 function saveUser(document) {
-    let userData = Object.assign({}, dbOptions, {data: document, upsert:true, query:`{ "username": "${document.username}"}`});
+    let userData = Object.assign({}, dbOptions, {data: document, upsert:true, query:`{ "${field}": "${document.username}"}`});
     return new Promise((resolve, reject) => {
         mLab.updateDocuments(userData, (err, data) => {
             console.log("Upsert user", err, data);

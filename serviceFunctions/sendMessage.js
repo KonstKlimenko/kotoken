@@ -18,6 +18,7 @@ methods.sendMessage = function(_fromID, _toID, _message) {
         })
         .then(function (response) {
             console.log(`Send message to user ${_toID}: ${_message}`);
+            console.dir(response, { depth: 2, colors: true });
         })
         .catch(function (error) {
             console.log(error.name);

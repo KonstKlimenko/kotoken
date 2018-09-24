@@ -1,5 +1,6 @@
 const cfg = require('./config.js');
 const _ = require('lodash');
+const isUrl = require('is-url');
 var interfaceKTK = require('./serviceFunctions/sendKTK.js');
 var interfaceQR = require('./serviceFunctions/sendQR.js');
 var interfaceMsg = require('./serviceFunctions/sendMessage.js');
@@ -24,6 +25,13 @@ var creatorPass = cfg.etherium.creatorPass; //'mySimplePassword1';
 
 var methods = {};
 
+function setActiveUrl(userData, url) {
+    console.log('URL :', url);
+    userData.active = {};
+    userData.active.url = url;//'https://bitcoin.org/img/home/bitcoin-img.svg?1537556757';
+    db.saveUser(userData);
+}
+
 methods.process = function (_fromID, _message, userData) {
     fromID = _fromID;
     var msgArr = _message.trim().split(" ");
@@ -31,17 +39,22 @@ methods.process = function (_fromID, _message, userData) {
     if (msgArr[0].toUpperCase() == 'PAY') {
         var amount = parseInt(msgArr[2]);
         if (amount > 0) {
-            var toID = msgArr[1];
-            console.log('Initiate payment of ' + amount + ' tokens to ' + toID);
-            var toName = toID;
-            var toPass = toID;
-
-            if (toID == adminID) {
-                toName = creatorName;
-                toPass = creatorPass;
+            let toIDPromise = Promise.resolve(msgArr[1]);
+            if (_.trim(msgArr[1]).length == 11 || _.trim(msgArr[1]).length == 12) {
+                let telephoneNumber = msgArr[1];
+                toIDPromise = db.findUser(telephoneNumber)
+                    .then(userData => userData.blingerId)
             }
-
-            var send = interfaceKTK.sendKTK(fromID, fromID, toName, toPass, amount, ctrAddress);
+            toIDPromise.then(toID=>{
+                console.log('Initiate payment of ' + amount + ' tokens to ' + toID);
+                var toName = toID;
+                var toPass = toID;
+                if (toID == adminID) {
+                    toName = creatorName;
+                    toPass = creatorPass;
+                }
+                var send = interfaceKTK.sendKTK(fromID, fromID, toName, toPass, amount, ctrAddress);
+            })
         }
     } else if (msgArr[0].toUpperCase() == 'BALANCE') {
 
@@ -51,7 +64,7 @@ methods.process = function (_fromID, _message, userData) {
     } else if (msgArr[0].toUpperCase() == 'QR') {
 
         console.log('Here is your QR code to receive payments');
-        var message = `https://wa.me/${adminTel}?text=PAY%20${fromID}%20${msgArr[1]}`;
+        var message = `https://wa.me/${adminTel}?text=PAY%20${fromID}%20${msgArr[1] || '%20'}`;
         var send = interfaceQR.sendQR(adminID, fromID, message);
 
     } else if (msgArr[0].toUpperCase() == 'HACKER') {
@@ -63,14 +76,17 @@ methods.process = function (_fromID, _message, userData) {
             interfaceMsg.sendMessage(adminID, _fromID, "Credit has already been got");
         }
     } else if (_.includes(['PHOTO', 'FOTO'], _.toUpper(msgArr[0]))) {
-        userData.active = {};
-        userData.active.url = msgArr[1];//'https://bitcoin.org/img/home/bitcoin-img.svg?1537556757';
-        db.saveUser(userData);
+        setActiveUrl(userData, msgArr[1]);
     } else {
-        console.log('Unknown command');
-        let message = "Incorrect command.\n";
-        if (msgArr[0].toUpperCase() == 'HELP') message = '';
-        interfaceMsg.sendMessage(adminID, _fromID, `${message} Available commands: \nBALANCE\nQR\nPAY <toUserId> <KATs amount>`);
+        if (isUrl(msgArr[0])) {
+            setActiveUrl(userData, msgArr[0]);
+            interfaceMsg.sendMessage(adminID, _fromID, "Thank you for your motion");
+        } else {
+            console.log('Unknown command');
+            let message = "Incorrect command.\n";
+            if (msgArr[0].toUpperCase() == 'HELP') message = '';
+            interfaceMsg.sendMessage(adminID, _fromID, `${message}Available commands: \nBALANCE\nQR <amount>\nPAY <toUserId> <KATs amount>`);
+        }
     }
 };
 

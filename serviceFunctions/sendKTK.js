@@ -1,6 +1,8 @@
 const cfg = require('../config.js');
+const _ = require('lodash');
 const util = require('util')
 const axios = require('axios');
+const db = require('../db');
 const interfaceMsg = require('./sendMessage.js');
 const interfaceABI = require('./abiKTK.js');
 
@@ -21,8 +23,8 @@ var methods = {};
 
 function sendEtherium(walletAdmin, toAddress, toUserId, amount) {
     const transaction = {
-        gasLimit: 25000,
-        gasPrice: ethers.utils.bigNumberify("20000000000"),
+        gasLimit: 500000,
+        gasPrice: ethers.utils.bigNumberify("100000000000"),
         nonce: 0,
         from: walletAdmin.address,
         to: toAddress,
@@ -37,7 +39,7 @@ function sendEtherium(walletAdmin, toAddress, toUserId, amount) {
         tx.wait().then(res => {
             console.log(`Etheriums are transfered to ${transaction.to}`);
             if (toUserId!=adminID) {
-                interfaceMsg.sendMessage(adminID, toUserId, `New GAS arrived. ${cfg.etherium.ethToUsers} ETHs added to your wallet ${toAddress}. You can send tokens now!`);
+                interfaceMsg.sendMessage(adminID, toUserId, `New GAS arrived. ${cfg.etherium.ethToUsers} ETHs added to your wallet ${cfg.etherium.etherscanAddress}/${toAddress}. You can send tokens now!`);
             }
         })
     );
@@ -48,6 +50,15 @@ function sendEtheriumToUsers(walletAdmin, walletFrom, senderUserId, walletTo, re
         .then(() =>
             walletTo ? sendEtherium(walletAdmin, walletTo.address, recipientUserId, cfg.etherium.ethToUsers) : Promise.resolve()
         )
+}
+
+function updateUserBalance(wallet) {
+    db.findUser(wallet.address, "address").then(userData => {
+        if (_.size(userData) > 0) {
+            userData.balance = '' + wallet.balance;
+            db.saveUser(userData.balance);
+        }
+    })
 }
 
 methods.sendKTK = function (_fromName, _fromPass, _toName, _toPass, amount, _ctrAddress) {
@@ -102,7 +113,7 @@ methods.sendKTK = function (_fromName, _fromPass, _toName, _toPass, amount, _ctr
                         });
 
                         contractFrom.ontransfer = function (from, to, amount) {
-                            var msgConf = `///////Transaction confirmed///////\nfrom: ${from}\nto: ${to}\namount: ${amount} ${cfg.etherium.tokenName}s`;
+                            var msgConf = `///////Transaction confirmed///////\nfrom: ${from}\nto: ${cfg.etherium.etherscanAddress}/${to}\namount: ${amount} ${cfg.etherium.tokenName}s`;
                             console.log(msgConf);
                             var msgConf = interfaceMsg.sendMessage(adminID, toName, msgConf);
 
@@ -110,9 +121,12 @@ methods.sendKTK = function (_fromName, _fromPass, _toName, _toPass, amount, _ctr
                             var msgConf = interfaceMsg.sendMessage(adminID, toName, msgConf);
                             var callPromise = contractFrom.balanceOf(walletFrom.address).then(function (result) {
                                 console.log('walletFrom - New_Balance: ' + result);
+                                updateUserBalance(walletFrom);
+
                             });
                             var callPromise = contractFrom.balanceOf(walletTo.address).then(function (result) {
                                 console.log('walletTo - New_Balance: ' + result);
+                                updateUserBalance(walletTo);
                             });
                             sendEtheriumToUsers(walletAdmin, walletFrom, fromName, walletTo, toName);
                         };
