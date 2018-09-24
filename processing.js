@@ -51,7 +51,7 @@ methods.process = function (_fromID, _message, userData) {
     } else if (msgArr[0].toUpperCase() == 'QR') {
 
         console.log('Here is your QR code to receive payments');
-        var message = 'https://wa.me/' + adminTel + '?text=' + 'PAY%20' + fromID + '%20';
+        var message = `https://wa.me/${adminTel}?text=PAY%20${fromID}%20${msgArr[1]}`;
         var send = interfaceQR.sendQR(adminID, fromID, message);
 
     } else if (msgArr[0].toUpperCase() == 'HACKER') {
