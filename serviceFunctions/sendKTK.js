@@ -1,6 +1,6 @@
 const cfg = require('../config.js');
 const _ = require('lodash');
-const util = require('util')
+const util = require('util');
 const axios = require('axios');
 const db = require('../db');
 const interfaceMsg = require('./sendMessage.js');
@@ -113,9 +113,10 @@ methods.sendKTK = function (_fromName, _fromPass, _toName, _toPass, amount, _ctr
                         });
 
                         contractFrom.ontransfer = function (from, to, amount) {
-                            var msgConf = `///////Transaction confirmed///////\nfrom: ${from}\nto: ${cfg.etherium.etherscanAddress}/${to}\namount: ${amount} ${cfg.etherium.tokenName}s`;
+                            var msgConf = `///////Transaction confirmed///////\nfrom: ${from}\nto: ${to}\namount: ${amount} ${cfg.etherium.tokenName}s`;
                             console.log(msgConf);
-                            var msgConf = interfaceMsg.sendMessage(adminID, toName, msgConf);
+                            interfaceMsg.sendMessage(adminID, toName, msgConf);
+                            interfaceMsg.sendMessage(adminID, fromName, msgConf);
 
 
                             var msgConf = interfaceMsg.sendMessage(adminID, toName, msgConf);
