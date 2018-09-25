@@ -52,11 +52,11 @@ function sendEtheriumToUsers(walletAdmin, walletFrom, senderUserId, walletTo, re
         )
 }
 
-function updateUserBalance(wallet) {
+function updateUserBalance(wallet, balance) {
     db.findUser(wallet.address, "address").then(userData => {
         if (_.size(userData) > 0) {
-            userData.balance = '' + wallet.balance;
-            db.saveUser(userData.balance);
+            userData[0].balance = '' + balance;
+            db.saveUser(userData[0]);
         }
     })
 }
@@ -121,12 +121,12 @@ methods.sendKTK = function (_fromName, _fromPass, _toName, _toPass, amount, _ctr
                             var msgConf = interfaceMsg.sendMessage(adminID, toName, msgConf);
                             var callPromise = contractFrom.balanceOf(walletFrom.address).then(function (result) {
                                 console.log('walletFrom - New_Balance: ' + result);
-                                updateUserBalance(walletFrom);
+                                updateUserBalance(walletFrom, result);
 
                             });
                             var callPromise = contractFrom.balanceOf(walletTo.address).then(function (result) {
                                 console.log('walletTo - New_Balance: ' + result);
-                                updateUserBalance(walletTo);
+                                updateUserBalance(walletTo, result);
                             });
                             sendEtheriumToUsers(walletAdmin, walletFrom, fromName, walletTo, toName);
                         };

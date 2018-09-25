@@ -8,6 +8,7 @@ const configs = {
             networkId: 3, //ropsten
             etherscanAddress:"https://ropsten.etherscan.io/address",
             ethToUsers:"0.0005",
+            hackerTokensAmount:"1000"
         },
         mongo: {
             // db: "sketchethe0",

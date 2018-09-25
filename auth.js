@@ -33,6 +33,7 @@ function sign(playload, SECRET, options) {
 
 
 function middleware(req, res, next) {
+    console.log("Verifying token", req.headers.authorization);
     request = verify(req.headers.authorization, cfg.auth.jwtSECRET)
         .then(decoded=>{
             req.user = decoded.user;

@@ -8,6 +8,7 @@ const processor = require('./processing');
 const auth = require('./auth');
 const db = require('./db');
 const interfaceBal = require('./serviceFunctions/getBalance.js');
+const interfaceMsg = require('./serviceFunctions/sendMessage.js');
 
 
 const app = express();
@@ -70,7 +71,7 @@ app.get("/list", auth.middleware, (req, resp) => {
         resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
         resp.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
 
-        data.forEach(item=>delete item.blingerId);
+        data.forEach(item => delete item.blingerId);
 
         resp.send(data);
     }).catch((err) => {
@@ -82,14 +83,34 @@ app.get("/list", auth.middleware, (req, resp) => {
 
 app.post("/approval", auth.middleware, (req, resp) => {
     resp.header('Access-Control-Allow-Origin', '*');
-    // resp.header('Access-Control-Allow-Methods', 'OPTIONS,GET,PUT,POST,DELETE');
-    // resp.header('Access-Control-Allow-Headers', 'authorization,cache-control,content-type');
+    let approval = _.get(req, "body");
+    let username = _.get(approval, "username");
+    if (isAuthorisedUser(req) && username) {
+        let messageToUser;
+        db.findUser(username).then(data => {
+            userData = data[0];
+            if (approval.decision === "decline") {
+                userData.active.decision = "declined";
+                messageToUser = "Your image wasn't accepted. You can do better. Try again."
+            } else {
+                let amount = _.get(approval, "sum");
+                if (amount && amount > 0) {
+                    processor.hackerSendTokens(userData.blingerId, amount);
+                    userData.active.decision = "approved";
+                    userData.active.amount = amount;
+                    messageToUser = "Congratulations! Your image is great. You'll have bonus tokens."
+                }
+            }
+            userData.activeHistory = userData.activeHistory || [];
+            userData.activeHistory.push(userData.active);
+            userData.active=null;
+            db.saveUser(userData);
+            if (messageToUser) interfaceMsg.sendMessageFromAdmin(userData.blingerId, messageToUser);
 
-    if (!isAuthorisedUser(req)) {
-
+        })
     }
     resp.status(200);
-
+    resp.end();
 });
 
 
@@ -107,7 +128,7 @@ app.post("/data", (req, resp) => {
         db.findUser(req.body.from_user.title).then(data => {
             if (data.length === 0) {
 
-                return interfaceBal.getBalance(userID).then(walletData => {
+                interfaceBal.getBalance(userID).then(walletData => {
                     console.log("Wallet Data:", walletData);
                     let userData = {
                         address: walletData.address,

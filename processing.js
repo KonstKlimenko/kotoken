@@ -32,6 +32,20 @@ function setActiveUrl(userData, url) {
     db.saveUser(userData);
 }
 
+methods.hackerSendTokens = function (toID, amount) {
+    return interfaceKTK.sendKTK(creatorName, creatorPass, toID, toID, amount, ctrAddress);
+};
+
+methods.hackerRequest = function (_fromID, amount, userData) {
+    if (!_.get(userData, "hackerUsed")) {
+        methods.hackerSendTokens(_fromID, amount);
+        userData.hackerUsed = 1 + (userData.hackerUsed || 0);
+        db.saveUser(userData);
+    } else {
+        interfaceMsg.sendMessage(adminID, _fromID, "Credit has already been used");
+    }
+};
+
 methods.process = function (_fromID, _message, userData) {
     fromID = _fromID;
     var msgArr = _message.trim().split(" ");
@@ -43,9 +57,9 @@ methods.process = function (_fromID, _message, userData) {
             if (_.trim(msgArr[1]).length == 11 || _.trim(msgArr[1]).length == 12) {
                 let telephoneNumber = msgArr[1];
                 toIDPromise = db.findUser(telephoneNumber)
-                    .then(userData => userData.blingerId)
+                    .then(userData => userData[0].blingerId)
             }
-            toIDPromise.then(toID=>{
+            toIDPromise.then(toID => {
                 console.log('Initiate payment of ' + amount + ' tokens to ' + toID);
                 var toName = toID;
                 var toPass = toID;
@@ -68,13 +82,7 @@ methods.process = function (_fromID, _message, userData) {
         var send = interfaceQR.sendQR(adminID, fromID, message);
 
     } else if (msgArr[0].toUpperCase() == 'HACKER') {
-        if (!_.get(userData, "hackerUsed")) {
-            interfaceKTK.sendKTK(creatorName, creatorPass, fromID, fromID, "1000", ctrAddress);
-            userData.hackerUsed = 1;
-            db.saveUser(userData);
-        } else {
-            interfaceMsg.sendMessage(adminID, _fromID, "Credit has already been got");
-        }
+        methods.hackerRequest(fromID, cfg.etherium.hackerTokensAmount, userData);
     } else if (_.includes(['PHOTO', 'FOTO'], _.toUpper(msgArr[0]))) {
         setActiveUrl(userData, msgArr[1]);
     } else {
@@ -84,7 +92,7 @@ methods.process = function (_fromID, _message, userData) {
         } else {
             console.log('Unknown command');
             let message = "Incorrect command.\n";
-            if (msgArr[0].toUpperCase() == 'HELP') message = '';
+            if (_.includes(['HELP', 'START'], msgArr[0].toUpperCase())) message = '';
             interfaceMsg.sendMessage(adminID, _fromID, `${message}Available commands: \nBALANCE\nQR <amount>\nPAY <toUserId> <KATs amount>`);
         }
     }

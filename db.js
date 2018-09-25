@@ -29,6 +29,7 @@ function findUser(value, field="username") {
 }
 
 function saveUser(document, ) {
+    console.log("Save user", document);
     let userData = Object.assign({}, dbOptions, {data: document, upsert:true, query:`{ "username": "${document.username}"}`});
     return new Promise((resolve, reject) => {
         mLab.updateDocuments(userData, (err, data) => {
@@ -38,6 +39,7 @@ function saveUser(document, ) {
             }
             findUser(document.username)
                 .then(updatedUser => {
+                    console.log("Saved user", updatedUser);
                     resolve(updatedUser)
                 });
         })
