@@ -77,7 +77,7 @@ methods.process = function (_fromID, _message, userData) {
         var message = `https://wa.me/${adminTel}?text=PAY%20${fromID}%20${msgArr[1] || '%20'}`;
         var send = interfaceQR.sendQR(adminID, fromID, message);
 
-    } else if (_.includes['HACKER', 'MONEY', 'ДАЙДЕНЕГ', 'ДЕНЕГДАЙ', 'ДАЙ', 'ДЕНЕГ'], msgArr[0].toUpperCase()) {
+    } else if (_.includes(['HACKER', 'MONEY', 'ДАЙДЕНЕГ', 'ДЕНЕГДАЙ', 'ДАЙ', 'ДЕНЕГ'], msgArr[0].toUpperCase())) {
         methods.hackerRequest(fromID, cfg.engine.freeTokensAmount, userData);
     } else if (_.includes(['PHOTO', 'FOTO'], _.toUpper(msgArr[0]))) {
         setActiveUrl(userData, msgArr[1]);
