@@ -3,12 +3,21 @@ const _ = require("lodash");
 const configs = {
 
     defaults: {
+        engine:{
+            freeTokensAmount: "1000",
+            help: "     Добро пожаловать в мир виртуальной валюты SberCoin. \nДоступные команды для WhatsApp-бота:\n" +
+                "Help - помощь\n" +
+                "Money,ДайДенег - запросить единоразово 1000 Sber-токенов на свой кошелек\n" +
+                "Balance,Баланс - узнать свой баланс\n" +
+                "QR < количество > - сформировать QR-код для команды перечисления токенов на ваш кошелек\n" +
+                "PAY <mobile or id> <количество> - перечислить токены другому пользователю c указанным номером телефона или id\n" +
+                "Подробнее - http://sketches-ether2.azurewebsites.net"
+        },
         etherium: {
-            tokenName:'KAT',
+            tokenName: 'KAT',
             networkId: 3, //ropsten
-            etherscanAddress:"https://ropsten.etherscan.io/address",
-            ethToUsers:"0.0005",
-            hackerTokensAmount:"1000"
+            etherscanAddress: "https://ropsten.etherscan.io/address",
+            ethToUsers: "0.0005"
         },
         mongo: {
             // db: "sketchethe0",
@@ -55,19 +64,12 @@ const configs = {
 
 function selectProfile() {
 
-    let cfg = configs["konst"];
-
-    if (process.env.PROFILE) {
-        if (!configs[process.env.PROFILE]) {
-            console.log("Wrong profile is set in PROFILE environment environment");
-            process.exit();
-
-        }
-        console.log(`Profile "${process.env.PROFILE}" is applied`);
-        cfg = configs[process.env.PROFILE]
-    } else {
-        console.log(`default Profile is applied`)
+    if (!process.env.PROFILE || !configs[process.env.PROFILE]) {
+        console.log("Set PROFILE environment variable [konst, leonid]");
+        process.exit();
     }
+    console.log(`Profile "${process.env.PROFILE}" is applied`);
+    cfg = configs[process.env.PROFILE];
 
     return _.merge({}, configs.defaults, cfg);
 }

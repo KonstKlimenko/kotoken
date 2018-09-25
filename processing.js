@@ -70,19 +70,15 @@ methods.process = function (_fromID, _message, userData) {
                 var send = interfaceKTK.sendKTK(fromID, fromID, toName, toPass, amount, ctrAddress);
             })
         }
-    } else if (msgArr[0].toUpperCase() == 'BALANCE') {
-
-        //Send user his/her balance
+    } else if (_.includes(['BALANCE', 'БАЛАНС'], msgArr[0].toUpperCase())) {
         var bal = interfaceBal.sendBalanceToUser(fromID);
-
     } else if (msgArr[0].toUpperCase() == 'QR') {
-
         console.log('Here is your QR code to receive payments');
         var message = `https://wa.me/${adminTel}?text=PAY%20${fromID}%20${msgArr[1] || '%20'}`;
         var send = interfaceQR.sendQR(adminID, fromID, message);
 
-    } else if (msgArr[0].toUpperCase() == 'HACKER') {
-        methods.hackerRequest(fromID, cfg.etherium.hackerTokensAmount, userData);
+    } else if (_.includes['HACKER', 'MONEY', 'ДАЙДЕНЕГ', 'ДЕНЕГДАЙ', 'ДАЙ', 'ДЕНЕГ'], msgArr[0].toUpperCase()) {
+        methods.hackerRequest(fromID, cfg.engine.freeTokensAmount, userData);
     } else if (_.includes(['PHOTO', 'FOTO'], _.toUpper(msgArr[0]))) {
         setActiveUrl(userData, msgArr[1]);
     } else {
@@ -90,10 +86,8 @@ methods.process = function (_fromID, _message, userData) {
             setActiveUrl(userData, msgArr[0]);
             interfaceMsg.sendMessage(adminID, _fromID, "Thank you for your motion");
         } else {
-            console.log('Unknown command');
-            let message = "Incorrect command.\n";
-            if (_.includes(['HELP', 'START'], msgArr[0].toUpperCase())) message = '';
-            interfaceMsg.sendMessage(adminID, _fromID, `${message}Available commands: \nBALANCE\nQR <amount>\nPAY <toUserId> <KATs amount>`);
+            console.log('Unknown command', msgArr[0]);
+            interfaceMsg.sendMessage(adminID, _fromID, `${cfg.engine.help}`);
         }
     }
 };
