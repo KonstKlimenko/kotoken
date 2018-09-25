@@ -54,11 +54,14 @@ methods.process = function (_fromID, _message, userData) {
         var amount = parseInt(msgArr[2]);
         if (amount > 0) {
             let toIDPromise = Promise.resolve(msgArr[1]);
-            if (_.trim(msgArr[1]).length == 11 || _.trim(msgArr[1]).length == 12) {
+            if (msgArr[1]==='SberBook') {
+                toIDPromise=Promise.resolve(adminID)
+            } else if (_.trim(msgArr[1]).length == 11 || _.trim(msgArr[1]).length == 12) {
                 let telephoneNumber = msgArr[1];
                 toIDPromise = db.findUser(telephoneNumber)
                     .then(userData => userData[0].blingerId)
             }
+
             toIDPromise.then(toID => {
                 console.log('Initiate payment of ' + amount + ' tokens to ' + toID);
                 var toName = toID;
